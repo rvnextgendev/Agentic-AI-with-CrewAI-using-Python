@@ -61,21 +61,18 @@ with st.sidebar:
     st.divider()
     st.caption("Free-tier limits can pause generation. Keep this tab open while it runs.")
     st.caption("Posts are prepared for review. Publishing to LinkedIn is manual.")
+    st.divider()
+    st.caption("Powered by CrewAI")
 
 st.markdown('<div class="studio-eyebrow">RESEARCH · WRITE · REFINE</div>', unsafe_allow_html=True)
 st.title("A better LinkedIn post starts here.")
 st.write("Turn a topic into a researched draft, an improved post, and a plan for publishing it.")
 
-left, right = st.columns([2, 1])
-with left:
-    with st.form("topic_form"):
-        topic = st.text_area("What would you like to write about?", max_chars=200,
-                             placeholder="e.g. Python automation tips for beginners", height=110)
-        st.caption("Be specific about the topic and audience. Use 3–200 characters.")
-        submitted = st.form_submit_button("Generate content", type="primary", use_container_width=True)
-with right:
-    st.markdown("#### A few starting points")
-    st.markdown("- Practical AI for small businesses\n- Lessons from your first Python project\n- Making remote teamwork easier")
+with st.form("topic_form"):
+    topic = st.text_area("What would you like to write about?", max_chars=200,
+                         placeholder="e.g. Python automation tips for beginners", height=110)
+    st.caption("Be specific about the topic and audience. Use 3–200 characters.")
+    submitted = st.form_submit_button("Generate content", type="primary", use_container_width=True)
 
 configuration_error = None
 try:
