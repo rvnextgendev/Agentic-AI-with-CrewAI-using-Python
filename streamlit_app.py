@@ -62,7 +62,8 @@ with st.sidebar:
     st.caption("Free-tier limits can pause generation. Keep this tab open while it runs.")
     st.caption("Posts are prepared for review. Publishing to LinkedIn is manual.")
     st.divider()
-    st.caption("Powered by CrewAI")
+    st.caption("Powered by Crew AI Framework")
+    st.caption("Developed by RvNext Rajesh")
 
 st.markdown('<div class="studio-eyebrow">RESEARCH · WRITE · REFINE</div>', unsafe_allow_html=True)
 st.title("A better LinkedIn post starts here.")
