@@ -21,37 +21,17 @@ from utils import Validators, OutputFormatter, logger
 load_dotenv()
 
 # ============================================================================
-# SETUP & VALIDATION
-# ============================================================================
-
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-SERPER_API_KEY = os.getenv("SERPER_API_KEY")
-
-# Validate API keys
-api_keys = {"OPENAI_API_KEY": OPENAI_API_KEY, "SERPER_API_KEY": SERPER_API_KEY}
-if not Validators.validate_api_keys(api_keys):
-    print("❌ ERROR: Missing required API keys in .env file")
-    sys.exit(1)
-
-logger.info("API keys validated successfully")
-
-# Initialize agents and tasks
-agents = get_all_agents()
-agent_list = list(agents)
-tasks = get_all_tasks(agents)
-logger.info(f"Initialized {len(agent_list)} agents and {len(tasks)} tasks")
-
-# ============================================================================
 # CREW CREATION & EXECUTION
 # ============================================================================
 
 def create_linkedin_crew(topic: str, agents: tuple, tasks: tuple) -> Crew:
     """Create and configure the CrewAI team."""
     return Crew(
-        agents=agents,
-        tasks=tasks,
+        agents=list(agents),
+        tasks=list(tasks),
         verbose=True,
-        memory=True,
+        memory=False,
+        max_rpm=8,
         process="sequential",
     )
 
@@ -59,6 +39,19 @@ def create_linkedin_crew(topic: str, agents: tuple, tasks: tuple) -> Crew:
 def main():
     """Main entry point."""
     try:
+        if "--smoke-test" in sys.argv:
+            from config.llm import create_llm
+            reply = create_llm().invoke("Reply with exactly: Groq connection successful")
+            print(reply.content)
+            return reply.content
+
+        from config.llm import validate_llm_key
+        validate_llm_key()
+        if not Validators.validate_api_keys({"SERPER_API_KEY": os.getenv("SERPER_API_KEY")}):
+            sys.exit(1)
+        agents = get_all_agents()
+        tasks = get_all_tasks(agents)
+
         # Get topic from user
         topic = input("\n📝 Enter the topic/niche for your LinkedIn post: ").strip()
         

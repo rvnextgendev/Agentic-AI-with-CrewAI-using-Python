@@ -13,6 +13,7 @@ Agents:
 """
 
 from crewai import Agent
+from config.llm import create_llm
 from .tools_loader import load_tools
 
 
@@ -46,7 +47,9 @@ def create_trend_researcher_agent():
         tools=[search_tool, scrape_tool],
         verbose=True,
         allow_delegation=False,
-        memory=True,
+        memory=False,
+        llm=create_llm(),
+        max_iter=4,
     )
     
     return agent
@@ -85,7 +88,9 @@ def create_content_writer_agent():
         tools=[],
         verbose=True,
         allow_delegation=False,
-        memory=True,
+        memory=False,
+        llm=create_llm(),
+        max_iter=4,
     )
     
     return agent
@@ -125,7 +130,9 @@ def create_content_critic_agent():
         tools=[],
         verbose=True,
         allow_delegation=False,
-        memory=True,
+        memory=False,
+        llm=create_llm(),
+        max_iter=4,
     )
     
     return agent
@@ -164,7 +171,9 @@ def create_content_optimizer_agent():
         tools=[],
         verbose=True,
         allow_delegation=False,
-        memory=True,
+        memory=False,
+        llm=create_llm(),
+        max_iter=4,
     )
     
     return agent
@@ -201,7 +210,9 @@ def create_scheduling_agent():
         tools=[],
         verbose=True,
         allow_delegation=False,
-        memory=True,
+        memory=False,
+        llm=create_llm(),
+        max_iter=4,
     )
     
     return agent

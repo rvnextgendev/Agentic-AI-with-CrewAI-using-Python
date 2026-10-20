@@ -30,6 +30,9 @@ def create_research_task(agent):
     task = Task(
         description="""
         Research the latest trends, viral content patterns, and hot topics on LinkedIn for the given niche.
+        Use at most two research tool calls, then provide your Final Answer.
+        Keep the brief concise. Cite links and distinguish observed evidence
+        from suggestions; do not invent engagement counts or hashtag reach.
         
         Task Details:
         - Find 3-5 trending angles and themes currently performing well in {topic}

@@ -22,7 +22,7 @@ Tool Configuration:
 
 import os
 import sys
-from crewai_tools import SerperDevTool, ScrapeWebsiteTool
+from .web_tools import SerperDevTool, ScrapeWebsiteTool
 
 
 # ============================================================================

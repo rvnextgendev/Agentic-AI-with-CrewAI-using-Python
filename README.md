@@ -1,5 +1,15 @@
 # Autonomous LinkedIn Content Manager - CrewAI
 
+The Streamlit UI is available in `streamlit_app.py`:
+
+```powershell
+& ".\venv\Scripts\python.exe" -m streamlit run streamlit_app.py
+```
+
+See [Streamlit setup and deployment](DEPLOYMENT.md) for secrets, Python 3.11,
+deployment steps, and testing. The UI supports stage progress, editable posts,
+report downloads, and an optional deployment password.
+
 A production-ready AI-powered system that orchestrates a team of 5 specialized agents to research, write, critique, optimize, and prepare LinkedIn posts for publishing.
 
 ## 🎯 System Overview
@@ -24,7 +34,7 @@ Trend Research → Content Writing → Critique Review → Content Optimization 
 
 ## 📋 Prerequisites
 
-- Python 3.9+
+- Python 3.11 (tested with the pinned dependencies)
 - OpenAI API key (GPT-4 or GPT-4o recommended)
 - Serper Dev API key (for web search)
 
@@ -62,11 +72,45 @@ source venv/bin/activate
 
 ### Step 3: Install Dependencies
 
+For Windows PowerShell, use the Python 3.11 environment explicitly:
+
+```powershell
+& ".\venv\Scripts\python.exe" -m pip install -r requirements.txt
+```
+
+The research tools are implemented locally using LangChain, requests, and
+Beautiful Soup. Do not install the old `crewai-tools==0.1.6` package: it requires
+LanceDB versions that are no longer available from PyPI.
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ### Step 4: Configure Environment Variables
+
+For Groq testing, set these values in `.env` (see `.env.example`):
+
+```dotenv
+LLM_PROVIDER=groq
+GROQ_API_KEY=your_groq_api_key
+LLM_MODEL=qwen/qwen3.8-27b
+SERPER_API_KEY=your_serper_api_key
+```
+
+Test the model connection without running research:
+
+```powershell
+& ".\venv\Scripts\python.exe" linkedin_content_manager_advanced.py --smoke-test
+```
+
+Run all five agents with `--smoke-test` omitted. Memory is disabled to avoid
+requiring a separate embeddings provider. Groq free-tier limits still apply.
+The default Groq model is Qwen, which works with CrewAI 0.28's text-based
+tool actions. GPT-OSS can fail with `Tool choice is none, but model called a tool`
+in this older stack. Streamed free-tier rate limits retry after a 65-second
+pause, up to three times; partial responses are discarded before retrying.
+The `.env` file is private; never commit API keys. If it is already tracked by
+Git, `.gitignore` alone does not remove it from tracking.
 
 1. Copy `.env.example` to `.env`:
    ```bash
@@ -465,7 +509,7 @@ trend_researcher = Agent(
 
 Before running:
 
-- [ ] Python 3.9+ installed
+- [ ] Python 3.11 installed
 - [ ] Virtual environment activated
 - [ ] requirements.txt installed
 - [ ] .env file created with API keys
