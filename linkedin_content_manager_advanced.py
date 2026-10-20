@@ -5,6 +5,10 @@ Main entry point for running the CrewAI pipeline via command line.
 Uses modular components: agents, tasks, tools, config, and utils.
 """
 
+from runtime_check import check_python
+
+check_python()
+
 import os
 import sys
 import asyncio

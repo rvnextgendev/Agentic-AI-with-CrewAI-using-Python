@@ -1,3 +1,5 @@
+# Runtime: Python 3.11 on Windows and Streamlit Community Cloud.
+# Select 3.11 in Cloud Advanced settings; this file cannot change its runtime.
 # Core CrewAI packages
 crewai==0.28.0
 embedchain==0.1.98

@@ -1,5 +1,9 @@
 """Streamlit interface. Run: python -m streamlit run streamlit_app.py."""
 
+from runtime_check import check_python
+
+check_python()
+
 import hmac
 import json
 import os

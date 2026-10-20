@@ -3,8 +3,12 @@
 The Streamlit UI is available in `streamlit_app.py`:
 
 ```powershell
-& ".\venv\Scripts\python.exe" -m streamlit run streamlit_app.py
+.\run_streamlit.ps1 -InstallDependencies
 ```
+
+Both local and Cloud environments use **Python 3.11** and the same requirements.
+An existing Cloud app on Python 3.14 must be redeployed with Python 3.11 selected
+in **Advanced settings**; a Git push cannot change its runtime.
 
 See [Streamlit setup and deployment](DEPLOYMENT.md) for secrets, Python 3.11,
 deployment steps, and testing. The UI supports stage progress, editable posts,
