@@ -10,16 +10,18 @@ import os
 from datetime import datetime, timezone
 
 import streamlit as st
-from openai import PermissionDeniedError
 
 
 st.set_page_config(page_title="Post Studio | LinkedIn Content Manager", page_icon="✦", layout="wide")
 
 # Access secrets before loading the pipeline; Streamlit exposes root secrets
 # as environment variables. Local development can continue using .env.
-st.secrets.load_if_toml_exists()
+has_secrets = st.secrets.load_if_toml_exists()
+from config.environment import refresh_local_environment
+refresh_local_environment(protected_keys=set(st.secrets) if has_secrets else set())
 
 from pipeline import STAGES, run_pipeline, validate_configuration
+from ui_errors import report_failure
 
 
 def require_access():
@@ -111,14 +113,11 @@ if submitted:
                 st.session_state.report["stages"] = outputs
                 st.session_state.report["complete"] = True
                 status.update(label="Your content is ready", state="complete", expanded=False)
-            except PermissionDeniedError:
-                status.update(label="Model access denied", state="error")
-                st.error("Groq denied access to the configured model. Ask your project admin to enable qwen/qwen3.8-27b at https://console.groq.com/settings/project/limits, then try again. Completed stages remain available below.")
-            except Exception:
-                # Provider exceptions may include account identifiers; keep the
-                # public UI generic and retain any successfully completed stages.
+            except Exception as exc:
                 status.update(label="Generation could not finish", state="error")
-                st.error("The service could not finish this run. Check your API keys and limits, then try again. Any completed stages are available below.")
+                message, diagnostic = report_failure(exc)
+                st.error(message)
+                st.caption(diagnostic)
 
 report = st.session_state.get("report")
 if report and report["stages"]:

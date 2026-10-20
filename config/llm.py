@@ -2,15 +2,13 @@
 
 import os
 import time
-from pathlib import Path
-
-from dotenv import load_dotenv
+from config.environment import refresh_local_environment
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
 from openai import APIError, RateLimitError
 
 
-load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+refresh_local_environment()
 
 
 class GroqReActChatModel(ChatOpenAI):

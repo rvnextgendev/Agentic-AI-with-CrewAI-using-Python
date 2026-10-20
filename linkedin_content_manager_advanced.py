@@ -12,32 +12,11 @@ check_python()
 import os
 import sys
 import asyncio
-from dotenv import load_dotenv
-from crewai import Crew
+from pipeline import STAGES, run_pipeline, create_linkedin_crew
+from config.environment import refresh_local_environment
+from utils import logger
 
-# Import modular components
-from agents import get_all_agents
-from tasks import get_all_tasks
-from config import OUTPUT_SETTINGS
-from utils import Validators, OutputFormatter, logger
-
-# Load environment variables
-load_dotenv()
-
-# ============================================================================
-# CREW CREATION & EXECUTION
-# ============================================================================
-
-def create_linkedin_crew(topic: str, agents: tuple, tasks: tuple) -> Crew:
-    """Create and configure the CrewAI team."""
-    return Crew(
-        agents=list(agents),
-        tasks=list(tasks),
-        verbose=True,
-        memory=False,
-        max_rpm=8,
-        process="sequential",
-    )
+refresh_local_environment()
 
 
 def main():
@@ -49,25 +28,16 @@ def main():
             print(reply.content)
             return reply.content
 
-        from config.llm import validate_llm_key
-        validate_llm_key()
-        if not Validators.validate_api_keys({"SERPER_API_KEY": os.getenv("SERPER_API_KEY")}):
-            sys.exit(1)
-        agents = get_all_agents()
-        tasks = get_all_tasks(agents)
-
         # Get topic from user
         topic = input("\n📝 Enter the topic/niche for your LinkedIn post: ").strip()
         
-        if not Validators.validate_topic(topic):
-            sys.exit(1)
         
         logger.info(f"Starting pipeline for topic: {topic}")
         
         # Create and run crew
-        crew = create_linkedin_crew(topic, agents, tasks)
         print(f"\n🚀 Processing: {topic}\n")
-        result = crew.kickoff(inputs={"topic": topic})
+        outputs = run_pipeline(topic, verbose=True)
+        result = outputs[STAGES[-1]]
         
         # Display result
         print("\n" + "=" * 80)

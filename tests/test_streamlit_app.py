@@ -6,7 +6,7 @@ from openai import PermissionDeniedError
 
 from streamlit.testing.v1 import AppTest
 
-from pipeline import STAGES
+from pipeline import STAGES, PipelineError
 
 
 class StreamlitAppTests(unittest.TestCase):
@@ -72,6 +72,24 @@ class StreamlitAppTests(unittest.TestCase):
         self.assertEqual(len(app.exception), 0)
         self.assertTrue(app.warning)
         run.assert_not_called()
+
+    def test_incomplete_research_reports_the_real_stage_failure(self):
+        with patch("pipeline.run_pipeline", side_effect=PipelineError("Research reached its iteration limit without a usable answer. Try a more specific topic.")):
+            app = self.app()
+            app.text_area[0].set_value("Python automation")
+            app.button[0].click().run()
+        self.assertEqual(len(app.exception), 0)
+        self.assertIn("Research reached its iteration limit", app.error[0].value)
+
+    def test_rejected_key_explains_ui_configuration(self):
+        from openai import AuthenticationError
+        error = AuthenticationError("Invalid key", response=Mock(), body={})
+        with patch("pipeline.run_pipeline", side_effect=error):
+            app = self.app()
+            app.text_area[0].set_value("Python automation")
+            app.button[0].click().run()
+        self.assertEqual(len(app.exception), 0)
+        self.assertIn("Cloud Secrets", app.error[0].value)
 
     def test_model_permission_error_explains_project_setting(self):
         error = PermissionDeniedError("Model blocked", response=Mock(), body={"code": "model_permission_blocked_project"})

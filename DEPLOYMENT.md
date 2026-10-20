@@ -118,6 +118,30 @@ for current repository, Python version, and secrets settings.
 UI tests mock generation and do not spend API quota. The CLI remains available
 through `linkedin_content_manager_advanced.py`.
 
+## CLI works but the UI fails
+
+The CLI and UI now use the same `pipeline.run_pipeline` runner and task
+validation. An iteration-limit message is a failed stage in both interfaces,
+not a completed research brief.
+
+Run the UI with the same interpreter used for the CLI:
+
+```powershell
+& ".\venv\Scripts\python.exe" -m streamlit run streamlit_app.py
+```
+
+Restart an older running Streamlit process once after updating this code.
+Subsequent local UI reruns refresh values originally loaded from `.env`.
+Explicit process variables and root-level Streamlit secrets retain priority;
+update Cloud Secrets separately from local `.env`.
+
+If generation fails, the UI shows a specific message where possible and an
+exception type with a reference ID. Find that reference in the terminal
+running Streamlit, or in Community Cloud's app logs, to see the redacted
+traceback. Raw provider exceptions are not displayed to visitors. Any completed
+stages stay available in the current session. Keep the UI open during free-tier
+retries, and avoid testing the CLI and UI at the same time against one quota.
+
 GitHub Actions checks installation, native-library imports, and tests on
 Windows and Ubuntu with Python 3.11. Review the workflow result after pushing;
 a successful local check alone does not verify a fresh Cloud installation.
