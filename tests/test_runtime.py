@@ -24,6 +24,11 @@ class RuntimeTests(unittest.TestCase):
             self.assertEqual(model.openai_api_key, "test-cloud-key")
             self.assertEqual(model.openai_api_base, "https://api.groq.com/openai/v1")
 
+    def test_incompatible_gpt_oss_configuration_is_rejected_before_api_call(self):
+        with patch.dict(os.environ, {"LLM_PROVIDER": "groq", "LLM_MODEL": "openai/gpt-oss-20b", "GROQ_API_KEY": "test"}):
+            with self.assertRaisesRegex(ValueError, "Set LLM_MODEL=qwen"):
+                create_llm()
+
 
 if __name__ == "__main__":
     unittest.main()

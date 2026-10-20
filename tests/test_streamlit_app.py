@@ -1,6 +1,8 @@
 import os
 import unittest
 from unittest.mock import patch
+from unittest.mock import Mock
+from openai import PermissionDeniedError
 
 from streamlit.testing.v1 import AppTest
 
@@ -70,6 +72,15 @@ class StreamlitAppTests(unittest.TestCase):
         self.assertEqual(len(app.exception), 0)
         self.assertTrue(app.warning)
         run.assert_not_called()
+
+    def test_model_permission_error_explains_project_setting(self):
+        error = PermissionDeniedError("Model blocked", response=Mock(), body={"code": "model_permission_blocked_project"})
+        with patch("pipeline.run_pipeline", side_effect=error):
+            app = self.app()
+            app.text_area[0].set_value("Python automation")
+            app.button[0].click().run()
+        self.assertEqual(len(app.exception), 0)
+        self.assertIn("settings/project/limits", app.error[0].value)
 
     def test_password_gate(self):
         with patch.dict(os.environ, {"APP_PASSWORD": "test-password"}):

@@ -10,6 +10,7 @@ import os
 from datetime import datetime, timezone
 
 import streamlit as st
+from openai import PermissionDeniedError
 
 
 st.set_page_config(page_title="Post Studio | LinkedIn Content Manager", page_icon="✦", layout="wide")
@@ -80,7 +81,7 @@ try:
     validate_configuration()
 except ValueError as exc:
     configuration_error = str(exc)
-    st.warning("API configuration is incomplete. Add your Groq and Serper keys before generating.")
+    st.warning("API configuration needs attention. Check your model and API keys before generating.")
     with st.expander("Setup instructions"):
         st.write(configuration_error)
         st.code('LLM_PROVIDER = "groq"\nGROQ_API_KEY = "your_groq_api_key"\nLLM_MODEL = "qwen/qwen3.8-27b"\nSERPER_API_KEY = "your_serper_api_key"', language="toml")
@@ -110,6 +111,9 @@ if submitted:
                 st.session_state.report["stages"] = outputs
                 st.session_state.report["complete"] = True
                 status.update(label="Your content is ready", state="complete", expanded=False)
+            except PermissionDeniedError:
+                status.update(label="Model access denied", state="error")
+                st.error("Groq denied access to the configured model. Ask your project admin to enable qwen/qwen3.8-27b at https://console.groq.com/settings/project/limits, then try again. Completed stages remain available below.")
             except Exception:
                 # Provider exceptions may include account identifiers; keep the
                 # public UI generic and retain any successfully completed stages.

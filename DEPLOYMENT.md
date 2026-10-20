@@ -97,6 +97,14 @@ kept in the current session only. This is a small shared workspace, not a
 multi-user publishing service. The password is a shared access gate, not
 individual user accounts. Review generated factual claims before publishing.
 
+If Groq returns `model_permission_blocked_project`, a project admin must enable
+`qwen/qwen3.8-27b` at https://console.groq.com/settings/project/limits. A valid
+key alone does not grant model access. GPT-OSS is blocked by this app's
+configuration check because it fails with the legacy text-tool protocol.
+Provider `output_parse_failed` errors receive one retry with a clearer
+formatting instruction. If the retry also fails, the error remains visible;
+failed generations are never treated as valid tool actions.
+
 See the [official deployment instructions](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/deploy)
 for current repository, Python version, and secrets settings.
 

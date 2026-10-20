@@ -43,6 +43,38 @@ class GroqStreamTests(unittest.TestCase):
         self.assertEqual(stream.call_count, 4)
         self.assertEqual(sleep.call_count, 3)
 
+    def test_parse_failure_discards_partial_output_and_retries_with_instruction(self):
+        original = []
+        attempts = []
+
+        def stream(model, messages, **kwargs):
+            attempts.append(list(messages))
+            if len(attempts) == 1:
+                yield ChatGenerationChunk(message=AIMessageChunk(content="bad partial action"))
+                raise APIError("Parsing failed", Mock(), body={"error": {"code": "output_parse_failed", "failed_generation": "unsafe raw output"}})
+            yield ChatGenerationChunk(message=AIMessageChunk(content="Final Answer: OK"))
+
+        with patch.object(ChatOpenAI, "_stream", stream):
+            chunks = list(self.model._stream(original))
+        self.assertEqual([c.text for c in chunks], ["Final Answer: OK"])
+        self.assertEqual(original, [])
+        self.assertIn("plain text", attempts[1][-1].content)
+        self.assertNotIn("unsafe raw output", attempts[1][-1].content)
+
+    def test_parse_retry_is_bounded(self):
+        error = APIError("Parsing failed", Mock(), body={"code": "output_parse_failed"})
+        with patch.object(ChatOpenAI, "_stream", side_effect=error) as stream:
+            with self.assertRaises(APIError):
+                list(self.model._stream([]))
+        self.assertEqual(stream.call_count, 2)
+
+    def test_non_streaming_parse_error_is_also_retried(self):
+        error = APIError("Parsing failed", Mock(), body={"code": "output_parse_failed"})
+        with patch.object(ChatOpenAI, "_generate", side_effect=[error, "success"]) as generate:
+            result = self.model._generate([])
+        self.assertEqual(result, "success")
+        self.assertEqual(generate.call_count, 2)
+
 
 if __name__ == "__main__":
     unittest.main()
